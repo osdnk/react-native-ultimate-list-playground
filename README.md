@@ -10,3 +10,6 @@ yarn
 yarn start
 npx react-native run-android
 ```
+
+
+https://streamable.com/4yt5gj
