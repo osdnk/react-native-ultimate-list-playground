@@ -43,8 +43,8 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     // binds the data to the TextView in each row
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        //String animal = String.valueOf(mModule.valueAtIndex(position));
-        String animal = mModule.valueAtIndexString(position);
+        String animal = String.valueOf(mModule.valueAtIndex(position));
+        //String animal = mModule.valueAtIndexString(position);
         //holder.myTextView.setText(animal);
         if (holder.mLayout.getChildCount() == 0) {
           ViewGroup vg = ((ViewGroup) mView.getParent().getParent().getParent());

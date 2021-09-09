@@ -7,7 +7,8 @@ import { UltimateView } from './ultimate';
 
 const storage = new MMKV();
 
-let array = ['gupia', 'klucha', 'do', 'kwadratu', 'i', 'ziemiak', 'zlosliwy', 'servin', 'maijna', 'tie'];
+//let array = ['gupia', 'klucha', 'do', 'kwadratu', 'i', 'ziemiak', 'zlosliwy', 'servin', 'maijna', 'tie'];
+let array = [1,7,234,6,3,7,8,3,8,2,78,2];
 for (let i = 0; i < 10; i++) {
   array = array.concat(array);
 }

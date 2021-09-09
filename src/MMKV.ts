@@ -72,7 +72,6 @@ export interface MMKVInterface {
   getAllKeys: () => string[];
   getKluska: () => string;
   setArray: (array: string[]) => void;
-  setArraySize: (size: number) => void;
   /**
    * Delete all keys.
    */
@@ -148,9 +147,10 @@ export class MMKV implements MMKVInterface {
   setArray(array: string[]): void {
     // @ts-ignore
     global.arrayable = array;
+    // @ts-ignore
     global.arraySize = array.length;
-    const func = this.getFunctionFromCache('setArraySize');
-    func(array.length);
+    // const func = this.getFunctionFromCache('setArraySize');
+    // func(array.length);
    // return func(array);
   }
 }
