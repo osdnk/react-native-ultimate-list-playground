@@ -87,6 +87,7 @@ export default function App() {
       </View>
 
       <UltimateView style={{ width: 300, height: 300 }}/>
+      <Text>{!!global.HermesInternal ? "HEMES" : "JSC"}</Text>
     </View>
   );
 }
