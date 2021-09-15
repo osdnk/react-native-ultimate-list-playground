@@ -1,77 +1,43 @@
 package com.example.reactnativemmkv;
 
+import androidx.core.util.Pools;
+
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.UIManager;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.uimanager.UIManagerModule;
+import com.facebook.react.uimanager.annotations.ReactProp;
+import com.facebook.react.uimanager.events.Event;
+import com.facebook.react.uimanager.events.RCTEventEmitter;
+
+import androidx.annotation.Nullable;
+
 import android.content.Context;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.UIManager;
+import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.ViewManager;
-import com.reactnativemmkv.MmkvModule;
+import com.facebook.react.uimanager.events.RCTModernEventEmitter;
+import com.facebook.react.views.scroll.ScrollEventType;
+import com.facebook.react.views.view.ReactViewGroup;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
-class CustomView extends LinearLayout {
-  private ThemedReactContext context;
-  MyRecyclerViewAdapter adapter;
-
-  public CustomView(ThemedReactContext context) {
-    super(context);//ADD THIS
-    this.context = context;
-    init();
-  }
-
-  public void init() {
-    inflate(context, R.layout.activity_main, this);
-
-    ArrayList<String> animalNames = new ArrayList<>();
-    for (int i = 0; i < 100; i++){
-      animalNames.add("Horse");
-      animalNames.add("Cow");
-      animalNames.add("Camel");
-      animalNames.add("Sheep");
-      animalNames.add("Goat");
-    }
-
-
-    // set up the RecyclerView
-    RecyclerView recyclerView = findViewById(R.id.rvAnimals);
-    recyclerView.setLayoutManager(new LinearLayoutManager(context));
-
-    adapter = new MyRecyclerViewAdapter(context, recyclerView);
-    //adapter.setClickListener(c);
-    recyclerView.setAdapter(adapter);
-  }
-}
-
-class UltimateViewManager extends ViewGroupManager<LinearLayout> {
-
-  public static final String REACT_CLASS = "UltimateView";
-  ReactApplicationContext mCallerContext;
-
-  public UltimateViewManager(ReactApplicationContext reactContext) {
-    mCallerContext = reactContext;
-  }
-
-  @Override
-  public String getName() {
-    return REACT_CLASS;
-  }
-
-  @Override
-  public CustomView createViewInstance(ThemedReactContext context) {
-    return new CustomView(context);
-  }
-}
 
 public class UltimateListPackage implements ReactPackage {
 
@@ -83,7 +49,10 @@ public class UltimateListPackage implements ReactPackage {
   @Override
   public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
     return Arrays.asList(
-      new UltimateViewManager(reactContext));
+      new RecyclerRowManager(reactContext),
+      new RecyclerViewManager(reactContext),
+      new UltraFastTextWrapperManager(reactContext)
+    );
   }
 }
 

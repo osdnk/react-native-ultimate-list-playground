@@ -40,10 +40,14 @@ public class MmkvModule extends ReactContextBaseJavaModule {
 
   private static native void nativeInstall(long jsiPtr, String path);
   private static native int getArraySize(long jsiPtr);
+  private static native void setMoreCellsNeeded(long jsiPtr);
 
-  private static native long getValueAtIndex(long jsiPtr, int index);
-  private static native byte[] getValueAtIndexString(long jsiPtr, int index);
 
+  public void moreCellsNeeded() {
+    setMoreCellsNeeded(this.context.getJavaScriptContextHolder().get());
+  }
+
+  public static native byte[] getStringValueAtIndexByKey(long jsiPtr, int index, String key);
 
   @ReactMethod
   public void testGettingArray(Callback callback) {
@@ -54,9 +58,17 @@ public class MmkvModule extends ReactContextBaseJavaModule {
     return getArraySize(this.context.getJavaScriptContextHolder().get());
   }
 
+  private static native long getValueAtIndex(long jsiPtr, int index);
+
   public long valueAtIndex(int index) {
-     return getValueAtIndex(this.context.getJavaScriptContextHolder().get(), index);
+    return getValueAtIndex(this.context.getJavaScriptContextHolder().get(), index);
   }
+  public String stringValueAtIndexByKey(int index, String key) {
+    byte[] bytes = getStringValueAtIndexByKey(this.context.getJavaScriptContextHolder().get(), index, key);
+    return new String(bytes, StandardCharsets.UTF_8);
+  }
+
+  private static native byte[] getValueAtIndexString(long jsiPtr, int index);
 
   public String valueAtIndexString(int index) {
     return new String(getValueAtIndexString(this.context.getJavaScriptContextHolder().get(), index), StandardCharsets.UTF_8);

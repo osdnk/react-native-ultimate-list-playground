@@ -141,17 +141,25 @@ extern "C"
 JNIEXPORT jint JNICALL
 Java_com_reactnativemmkv_MmkvModule_getArraySize(JNIEnv *env, jclass clazz, jlong jsiPtr) {
     auto runtime = reinterpret_cast<jsi::Runtime*>(jsiPtr);
-    return 100;
-    //return obtainArraySize3(*runtime);
+  //  return 100;
+    return obtainArraySize4(*runtime);
 }
 
 
 unsigned long long obtainValueAtIndex(jsi::Runtime& jsiRuntime, jint index) {
-    if (jsiRuntime.global().hasProperty(jsiRuntime, "arrayable")) {
-        auto maybeArray = jsiRuntime.global().getProperty(jsiRuntime, "arrayable");
-        if (maybeArray.isObject() && maybeArray.asObject(jsiRuntime).isArray(jsiRuntime)) {
-            return maybeArray.asObject(jsiRuntime).asArray(jsiRuntime).getValueAtIndex(jsiRuntime, index).asNumber();
-        }
+//    if (jsiRuntime.global().hasProperty(jsiRuntime, "arrayable")) {
+//        auto maybeArray = jsiRuntime.global().getProperty(jsiRuntime, "arrayable");
+//        if (maybeArray.isObject() && maybeArray.asObject(jsiRuntime).isArray(jsiRuntime)) {
+//            return maybeArray.asObject(jsiRuntime).asArray(jsiRuntime).getValueAtIndex(jsiRuntime, index).asNumber();
+//        }
+//    }
+
+    if (jsiRuntime.global().hasProperty(jsiRuntime, "arrayableO")) {
+        //auto maybeObject = jsiRuntime.global().getProperty(jsiRuntime, "arrayableO");
+        //if (maybeObject.isObject() && maybeObject.asObject(jsiRuntime).hasProperty(jsiRuntime, std::to_string(index).c_str())) {
+            //return maybeObject.asObject(jsiRuntime).getProperty(jsiRuntime, std::to_string(index).c_str()).asNumber();
+            return 0;
+       // }
     }
     return 0;
     //   std::shared_ptr<MmkvHostObject> module =  std::static_pointer_cast<MmkvHostObject>(v.asObject(jsiRuntime).asHostObject(jsiRuntime));
@@ -161,17 +169,93 @@ unsigned long long obtainValueAtIndex(jsi::Runtime& jsiRuntime, jint index) {
 
 
 std::string obtainValueAtIndexString(jsi::Runtime& jsiRuntime, jint index) {
-    if (jsiRuntime.global().hasProperty(jsiRuntime, "arrayable")) {
-        auto maybeArray = jsiRuntime.global().getProperty(jsiRuntime, "arrayable");
-        if (maybeArray.isObject() && maybeArray.asObject(jsiRuntime).isArray(jsiRuntime)) {
-            return maybeArray.asObject(jsiRuntime).asArray(jsiRuntime).getValueAtIndex(jsiRuntime, index).asString(jsiRuntime).utf8(jsiRuntime);
-        }
-    }
-    return "FFF";
-    //   std::shared_ptr<MmkvHostObject> module =  std::static_pointer_cast<MmkvHostObject>(v.asObject(jsiRuntime).asHostObject(jsiRuntime));
+    return jsiRuntime.global().getProperty(jsiRuntime, "getArray").asObject(jsiRuntime).asFunction(jsiRuntime).call(jsiRuntime, index).asString(jsiRuntime).utf8(jsiRuntime);;
+//
+//    if (jsiRuntime.global().hasProperty(jsiRuntime, "arrayable")) {
+//        auto maybeArray = jsiRuntime.global().getProperty(jsiRuntime, "arrayable");
+//        if (maybeArray.isObject() && maybeArray.asObject(jsiRuntime).isArray(jsiRuntime)) {
+//            return maybeArray.asObject(jsiRuntime).asArray(jsiRuntime).getValueAtIndex(jsiRuntime, index).asString(jsiRuntime).utf8(jsiRuntime);
+//        }
+//    }
+//    return "FFF";
+//    //   std::shared_ptr<MmkvHostObject> module =  std::static_pointer_cast<MmkvHostObject>(v.asObject(jsiRuntime).asHostObject(jsiRuntime));
     // return module->sampleArray->getValueAtIndex(jsiRuntime, index).asString(jsiRuntime).utf8(jsiRuntime);
 }
 
+std::string obtainStringValueAtIndexByKey(jsi::Runtime& jsiRuntime, jint index, std::string key) {
+
+
+
+    auto value = jsiRuntime
+            .global()
+            .getProperty(jsiRuntime, "recyclableData")
+            .asObject(jsiRuntime)
+            .asArray(jsiRuntime)
+            .getValueAtIndex(jsiRuntime, index);
+
+
+    size_t pos;
+    std::string token;
+    while ((pos = key.find(".")) != std::string::npos) {
+        token = key.substr(0, pos);
+        value = value
+                .asObject(jsiRuntime)
+                .getProperty(jsiRuntime, token.c_str());
+        key.erase(0, pos + 1);
+    }
+
+    value = value
+            .asObject(jsiRuntime)
+            .getProperty(jsiRuntime, key.c_str());
+
+    return
+        value
+        .asString(jsiRuntime)
+        .utf8(jsiRuntime);;
+
+
+//
+//    if (jsiRuntime.global().hasProperty(jsiRuntime, "arrayable")) {
+//        auto maybeArray = jsiRuntime.global().getProperty(jsiRuntime, "arrayable");
+//        if (maybeArray.isObject() && maybeArray.asObject(jsiRuntime).isArray(jsiRuntime)) {
+//            return maybeArray.asObject(jsiRuntime).asArray(jsiRuntime).getValueAtIndex(jsiRuntime, index).asString(jsiRuntime).utf8(jsiRuntime);
+//        }
+//    }
+//    return "FFF";
+//    //   std::shared_ptr<MmkvHostObject> module =  std::static_pointer_cast<MmkvHostObject>(v.asObject(jsiRuntime).asHostObject(jsiRuntime));
+    // return module->sampleArray->getValueAtIndex(jsiRuntime, index).asString(jsiRuntime).utf8(jsiRuntime);
+}
+
+std::string jstring2string(JNIEnv *env, jstring jStr) {
+    if (!jStr)
+        return "";
+
+    const jclass stringClass = env->GetObjectClass(jStr);
+    const jmethodID getBytes = env->GetMethodID(stringClass, "getBytes", "(Ljava/lang/String;)[B");
+    const jbyteArray stringJbytes = (jbyteArray) env->CallObjectMethod(jStr, getBytes, env->NewStringUTF("UTF-8"));
+
+    size_t length = (size_t) env->GetArrayLength(stringJbytes);
+    jbyte* pBytes = env->GetByteArrayElements(stringJbytes, NULL);
+
+    std::string ret = std::string((char *)pBytes, length);
+    env->ReleaseByteArrayElements(stringJbytes, pBytes, JNI_ABORT);
+
+    env->DeleteLocalRef(stringJbytes);
+    env->DeleteLocalRef(stringClass);
+    return ret;
+}
+
+extern "C"
+JNIEXPORT jbyteArray JNICALL
+Java_com_reactnativemmkv_MmkvModule_getStringValueAtIndexByKey(JNIEnv *env, jclass clazz, jlong jsiPtr, jint index, jstring key) {
+    auto runtime = reinterpret_cast<jsi::Runtime*>(jsiPtr);
+    std::string value = obtainStringValueAtIndexByKey(*runtime, index, jstring2string(env, key));
+    int byteCount = value.length();
+    jbyte* pNativeMessage = const_cast<jbyte *>(reinterpret_cast<const jbyte *>(value.c_str()));
+    jbyteArray bytes = env->NewByteArray(byteCount);
+    env->SetByteArrayRegion(bytes, 0, byteCount, pNativeMessage);
+    return  bytes;
+}
 
 
 
@@ -180,12 +264,7 @@ extern "C"
 JNIEXPORT jlong JNICALL
 Java_com_reactnativemmkv_MmkvModule_getValueAtIndex(JNIEnv *env, jclass clazz, jlong jsiPtr, jint index) {
     auto runtime = reinterpret_cast<jsi::Runtime*>(jsiPtr);
-    auto x = obtainValueAtIndex(*runtime, index);
-    return x;
-//    int byteCount = value.length();
-//    jbyte* pNativeMessage = const_cast<jbyte *>(reinterpret_cast<const jbyte *>(value.c_str()));
-//    jbyteArray bytes = env->NewByteArray(byteCount);
-//    env->SetByteArrayRegion(bytes, 0, byteCount, pNativeMessage);
+    return obtainValueAtIndex(*runtime, index);
 }
 
 extern "C"
@@ -198,4 +277,18 @@ Java_com_reactnativemmkv_MmkvModule_getValueAtIndexString(JNIEnv *env, jclass cl
     jbyteArray bytes = env->NewByteArray(byteCount);
     env->SetByteArrayRegion(bytes, 0, byteCount, pNativeMessage);
     return  bytes;
+}
+
+
+
+void increase(jsi::Runtime& jsiRuntime) {
+    jsiRuntime.global().getProperty(jsiRuntime, "increase").asObject(jsiRuntime).asFunction(jsiRuntime).call(jsiRuntime);
+}
+
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_reactnativemmkv_MmkvModule_setMoreCellsNeeded(JNIEnv *env, jclass clazz, jlong jsiPtr) {
+    auto runtime = reinterpret_cast<jsi::Runtime*>(jsiPtr);
+    increase(*runtime);
 }

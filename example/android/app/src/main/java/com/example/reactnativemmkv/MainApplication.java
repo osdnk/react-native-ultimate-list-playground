@@ -1,5 +1,9 @@
 package com.example.reactnativemmkv;
 
+import com.facebook.react.bridge.JSIModuleSpec;
+import com.facebook.react.bridge.JavaScriptContextHolder;
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.swmansion.reanimated.ReanimatedJSIModulePackage;
 import android.app.Application;
 import android.content.Context;
 
@@ -14,6 +18,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import com.reactnativemmkv.MmkvModulePackage;
 import com.reactnativemmkv.MmkvPackage;
+
+
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -39,7 +45,7 @@ public class MainApplication extends Application implements ReactApplication {
 
         @Override
         protected JSIModulePackage getJSIModulePackage() {
-          return new MmkvModulePackage();
+          return new ReanimatedJSIModulePackage();
         }
       };
 

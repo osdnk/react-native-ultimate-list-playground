@@ -1,3 +1,7 @@
-import {requireNativeComponent} from "react-native";
+import { requireNativeComponent, ViewProps } from 'react-native';
 
-export const UltimateView = requireNativeComponent('UltimateView')
+export const RecyclerListView = requireNativeComponent<ViewProps>('RecyclerListView')
+export const RecyclerRow = requireNativeComponent('RecyclerRow')
+export const UltraFastTextWrapper = requireNativeComponent(
+  'UltraFastTextWrapper'
+);

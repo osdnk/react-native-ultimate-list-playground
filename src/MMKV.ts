@@ -149,6 +149,7 @@ export class MMKV implements MMKVInterface {
     global.arrayable = array;
     // @ts-ignore
     global.arraySize = array.length;
+    // global.getArray = i => array[i]
     // const func = this.getFunctionFromCache('setArraySize');
     // func(array.length);
    // return func(array);
