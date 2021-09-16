@@ -19,6 +19,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useAnimatedRecycleHandler } from './useAnimatedRecycleEvent';
 import { ReText } from 'react-native-redash';
+//import { useDerivedValue } from './useImmediateDerivedValue';
 
 const DataContext = createContext<any[] | null>(null);
 const PositionContext = createContext<Animated.SharedValue<number> | null>(
@@ -176,12 +177,32 @@ function RecyclerView<TData>({
   data: TData[];
 }) {
   // @ts-ignore
+  const T = {}
+  const datas = useSharedValue(data);
+  console.log(datas)
+
   global.recyclableData = data;
+  global.sharedRecyclableData = datas;
+
+  useDerivedValue( () => {
+    if (global.LayoutAnimationRepository) {
+      global.recyclableData = datas.value;
+    }
+    console.log(global.x)
+  }, [data])
+
+  console.log(T.__reanimatedHostObjectRef)
+  console.log(datas.__reanimatedHostObjectRef, datas.value.__reanimatedHostObjectRef, "GGGG")
+
+//  console.log(global._WORKLET_RUNTIME)
+
+  setTimeout(() => console.log(global.x), 1000)
   return (
     <DataContext.Provider value={data}>
       <View style={style} removeClippedSubviews={false}>
         <RecyclableViews>{children}</RecyclableViews>
         <RecyclerListView
+          animatedRuntimeAddress={global._WORKLET_RUNTIME.toString()}
           count={data.length}
           style={StyleSheet.absoluteFillObject}
         />

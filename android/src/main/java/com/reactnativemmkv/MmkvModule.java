@@ -1,5 +1,7 @@
 package com.reactnativemmkv;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.facebook.react.bridge.Callback;
@@ -14,6 +16,8 @@ import java.nio.charset.StandardCharsets;
 
 @ReactModule(name = "MMKV")
 public class MmkvModule extends ReactContextBaseJavaModule {
+  public static long sAnimatedRuntimeAddress = -1;
+
   static {
     System.loadLibrary("reactnativemmkv");
   }
@@ -48,6 +52,7 @@ public class MmkvModule extends ReactContextBaseJavaModule {
   }
 
   public static native byte[] getStringValueAtIndexByKey(long jsiPtr, int index, String key);
+  public static native byte[] getStringValueAtIndexByKeyFromAnimatedThread(long animatedjsiPtr, long jsiptr, int index, String key);
 
   @ReactMethod
   public void testGettingArray(Callback callback) {
@@ -64,7 +69,8 @@ public class MmkvModule extends ReactContextBaseJavaModule {
     return getValueAtIndex(this.context.getJavaScriptContextHolder().get(), index);
   }
   public String stringValueAtIndexByKey(int index, String key) {
-    byte[] bytes = getStringValueAtIndexByKey(this.context.getJavaScriptContextHolder().get(), index, key);
+    Log.d("[A runtime]", String.valueOf(sAnimatedRuntimeAddress));
+    byte[] bytes = getStringValueAtIndexByKeyFromAnimatedThread(sAnimatedRuntimeAddress, this.context.getJavaScriptContextHolder().get(), index, key);
     return new String(bytes, StandardCharsets.UTF_8);
   }
 

@@ -209,21 +209,81 @@ std::string obtainStringValueAtIndexByKey(jsi::Runtime& jsiRuntime, jint index, 
             .getProperty(jsiRuntime, key.c_str());
 
     return
-        value
-        .asString(jsiRuntime)
-        .utf8(jsiRuntime);;
+            value
+                    .asString(jsiRuntime)
+                    .utf8(jsiRuntime);;
+}
+
+std::string obtainStringValueAtIndexByKeyFromAnimatedThred(jsi::Runtime& animatedRuntime, jsi::Runtime& supportRuntime, jint index, std::string key) {
 
 
+
+    jsi::Value recycleDataAtIndex;
+    bool isReanimatedThreadSetup = false;
+    //jsi::Runtime& usedRuntime = animatedRuntime;
+
+    auto global = animatedRuntime.global().getPropertyAsObject(animatedRuntime, "global"); // mmeh
 //
-//    if (jsiRuntime.global().hasProperty(jsiRuntime, "arrayable")) {
-//        auto maybeArray = jsiRuntime.global().getProperty(jsiRuntime, "arrayable");
-//        if (maybeArray.isObject() && maybeArray.asObject(jsiRuntime).isArray(jsiRuntime)) {
-//            return maybeArray.asObject(jsiRuntime).asArray(jsiRuntime).getValueAtIndex(jsiRuntime, index).asString(jsiRuntime).utf8(jsiRuntime);
-//        }
-//    }
-//    return "FFF";
-//    //   std::shared_ptr<MmkvHostObject> module =  std::static_pointer_cast<MmkvHostObject>(v.asObject(jsiRuntime).asHostObject(jsiRuntime));
-    // return module->sampleArray->getValueAtIndex(jsiRuntime, index).asString(jsiRuntime).utf8(jsiRuntime);
+    auto isThreadSetup = global.hasProperty(animatedRuntime, "recyclableData");
+    jsi::Runtime& runtime = isThreadSetup ? animatedRuntime : supportRuntime;
+
+    if (!isThreadSetup) {
+      //  return "XXX";
+        global = supportRuntime.global();
+    };
+
+
+    auto animatedData = global.getProperty(runtime, "recyclableData");
+//
+    if (animatedData.isObject()){
+        auto animatedObject = animatedData.asObject(runtime);
+        if (animatedObject.isArray(runtime)) {
+            auto animatedArray = animatedObject.asArray(runtime);
+            double g = animatedArray.length(runtime);
+            if (index < g) {
+                auto b = animatedArray.getValueAtIndex(runtime, index);
+                if (b.isObject()) {
+                    auto givenObj = b.asObject(runtime);
+                    if (givenObj.hasProperty(runtime, key.c_str())) {
+                        auto prop = givenObj.getProperty(runtime, key.c_str());
+                        if (prop.isString()) {
+                            return prop.asString(runtime).utf8(runtime);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return "FF";
+//
+//
+//
+//    // we don't have animated copy yet
+//
+//
+//
+//    auto value = recycleDataAtIndex;
+//
+////
+////
+////    size_t pos;
+////    std::string token;
+////    while ((pos = key.find(".")) != std::string::npos) {
+////        token = key.substr(0, pos);
+////        value = value
+////                .asObject(animatedRuntime)
+////                .getProperty(animatedRuntime, token.c_str());
+////        key.erase(0, pos + 1);
+////    }
+//
+//    value = value
+//            .asObject(animatedRuntime)
+//            .getProperty(animatedRuntime, key.c_str());
+//
+//    return value
+//                    .asString(animatedRuntime)
+//                    .utf8(animatedRuntime);;
 }
 
 std::string jstring2string(JNIEnv *env, jstring jStr) {
@@ -250,6 +310,27 @@ JNIEXPORT jbyteArray JNICALL
 Java_com_reactnativemmkv_MmkvModule_getStringValueAtIndexByKey(JNIEnv *env, jclass clazz, jlong jsiPtr, jint index, jstring key) {
     auto runtime = reinterpret_cast<jsi::Runtime*>(jsiPtr);
     std::string value = obtainStringValueAtIndexByKey(*runtime, index, jstring2string(env, key));
+    int byteCount = value.length();
+    jbyte* pNativeMessage = const_cast<jbyte *>(reinterpret_cast<const jbyte *>(value.c_str()));
+    jbyteArray bytes = env->NewByteArray(byteCount);
+    env->SetByteArrayRegion(bytes, 0, byteCount, pNativeMessage);
+    return  bytes;
+}
+
+
+extern "C"
+JNIEXPORT jbyteArray JNICALL
+Java_com_reactnativemmkv_MmkvModule_getStringValueAtIndexByKeyFromAnimatedThread(JNIEnv *env, jclass clazz, jlong animatedJsiPtr, jlong jsiPtr, jint index, jstring key) {
+
+    auto runtime = reinterpret_cast<jsi::Runtime*>(animatedJsiPtr);
+    auto supportRuntime = reinterpret_cast<jsi::Runtime*>(jsiPtr);
+    //std::string value ="VVV";
+    //
+    std::string value = obtainStringValueAtIndexByKeyFromAnimatedThred(*runtime, *supportRuntime, index, jstring2string(env, key));
+   // auto runtime = reinterpret_cast<jsi::Runtime*>(jsiPtr);
+   // auto anotherp = runtime->global().getProperty(*runtime, "_WORKLET_RUNTIME").asNumber();
+
+   // std::string value = "VVV";
     int byteCount = value.length();
     jbyte* pNativeMessage = const_cast<jbyte *>(reinterpret_cast<const jbyte *>(value.c_str()));
     jbyteArray bytes = env->NewByteArray(byteCount);
