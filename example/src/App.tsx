@@ -4,6 +4,7 @@ import { StyleSheet, View, TextInput, Alert, Button, Text } from 'react-native';
 import { MMKV } from 'react-native-mmkv';
 import { c } from './Benchmarks';
 import RecyclerView from './List';
+import AnimatedStyleUpdateExample from './ChatHeads';
 
 //const storage = new MMKV();
 
@@ -67,7 +68,7 @@ export default function App() {
 
 
       <RecyclerView/>
-      <Text>{!!global.HermesInternal ? "HERMES" : "JSC"}</Text>
+      <AnimatedStyleUpdateExample/>
     </View>
   );
 }

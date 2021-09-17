@@ -1,10 +1,15 @@
 package com.example.reactnativemmkv;
 
+import androidx.annotation.NonNull;
 import androidx.core.util.Pools;
 
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.ReactContextBaseJavaModule;
+import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.UIManager;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.uimanager.events.Event;
@@ -43,7 +48,7 @@ public class UltimateListPackage implements ReactPackage {
 
   @Override
   public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-    return Collections.emptyList();
+    return Collections.singletonList(new UltimateNativeModule(reactContext));
   }
 
   @Override
@@ -55,4 +60,5 @@ public class UltimateListPackage implements ReactPackage {
     );
   }
 }
+
 

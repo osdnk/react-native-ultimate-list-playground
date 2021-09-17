@@ -214,6 +214,9 @@ std::string obtainStringValueAtIndexByKey(jsi::Runtime& jsiRuntime, jint index, 
                     .utf8(jsiRuntime);;
 }
 
+jsi::Value* animatedDataCache = nullptr;
+long bbb = 0;
+
 std::string obtainStringValueAtIndexByKeyFromAnimatedThred(jsi::Runtime& animatedRuntime, jsi::Runtime& supportRuntime, jint index, std::string key) {
 
 
@@ -228,27 +231,25 @@ std::string obtainStringValueAtIndexByKeyFromAnimatedThred(jsi::Runtime& animate
     jsi::Runtime& runtime = isThreadSetup ? animatedRuntime : supportRuntime;
 
     if (!isThreadSetup) {
-      //  return "XXX";
         global = supportRuntime.global();
     };
 
 
-    auto animatedData = global.getProperty(runtime, "recyclableData");
-//
-    if (animatedData.isObject()){
-        auto animatedObject = animatedData.asObject(runtime);
-        if (animatedObject.isArray(runtime)) {
-            auto animatedArray = animatedObject.asArray(runtime);
-            double g = animatedArray.length(runtime);
-            if (index < g) {
-                auto b = animatedArray.getValueAtIndex(runtime, index);
-                if (b.isObject()) {
-                    auto givenObj = b.asObject(runtime);
-                    if (givenObj.hasProperty(runtime, key.c_str())) {
-                        auto prop = givenObj.getProperty(runtime, key.c_str());
-                        if (prop.isString()) {
-                            return prop.asString(runtime).utf8(runtime);
-                        }
+
+    jsi::Object animatedObject = global.getProperty(runtime, "recyclableData").asObject(runtime);
+
+
+    if (animatedObject.isArray(runtime)) {
+        auto animatedArray = animatedObject.asArray(runtime);
+        double g = animatedArray.length(runtime);
+        if (index < g) {
+            auto b = animatedArray.getValueAtIndex(runtime, index);
+            if (b.isObject()) {
+                auto givenObj = b.asObject(runtime);
+                if (givenObj.hasProperty(runtime, key.c_str())) {
+                    auto prop = givenObj.getProperty(runtime, key.c_str());
+                    if (prop.isString()) {
+                        return prop.asString(runtime).utf8(runtime);
                     }
                 }
             }
@@ -286,6 +287,7 @@ std::string obtainStringValueAtIndexByKeyFromAnimatedThred(jsi::Runtime& animate
 //                    .utf8(animatedRuntime);;
 }
 
+
 std::string jstring2string(JNIEnv *env, jstring jStr) {
     if (!jStr)
         return "";
@@ -316,6 +318,8 @@ Java_com_reactnativemmkv_MmkvModule_getStringValueAtIndexByKey(JNIEnv *env, jcla
     env->SetByteArrayRegion(bytes, 0, byteCount, pNativeMessage);
     return  bytes;
 }
+
+
 
 
 extern "C"
@@ -372,4 +376,53 @@ JNIEXPORT void JNICALL
 Java_com_reactnativemmkv_MmkvModule_setMoreCellsNeeded(JNIEnv *env, jclass clazz, jlong jsiPtr) {
     auto runtime = reinterpret_cast<jsi::Runtime*>(jsiPtr);
     increase(*runtime);
+}
+//
+//
+//extern "C"
+//JNIEXPORT jlong JNICALL
+//        Java_com_reactnativemmkv_MmkvModule_installPointerGetter
+
+
+void installPointerGetter(jsi::Runtime& jsiRuntime) {
+    // MMKV.createNewInstance()
+    auto getPointer = jsi::Function::createFromHostFunction(jsiRuntime,
+                                                                       jsi::PropNameID::forAscii(jsiRuntime, "getPointer"),
+                                                                       0,
+                                                                       [](jsi::Runtime& runtime,
+                                                                          const jsi::Value& thisValue,
+                                                                          const jsi::Value* arguments,
+                                                                          size_t count) -> jsi::Value {
+                                                                           jsi::Object x = arguments[0].asObject(runtime);
+                                                                           long vvv = (long) &x;
+                                                                           bbb = vvv;
+                                                                           return jsi::Value((double) vvv);
+//
+
+//                                                                           jsi::Object* xx = &x;
+//                                                                           long vvv = (long) xx;
+//                                                                           return jsi::Value(vvv);
+                                                                       });
+    jsiRuntime.global().getPropertyAsObject(jsiRuntime, "global").setProperty(jsiRuntime, "getPointer", std::move(getPointer));
+}
+
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_example_reactnativemmkv_UltimateNativeModule_getValueAtIndex(JNIEnv *env, jclass clazz,
+                                                                      jlong jsi_ptr, jint index) {
+    // TODO: implement getValueAtIndex()
+
+
+}
+
+
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_reactnativemmkv_UltimateNativeModule_installPointerGetter(JNIEnv *env,
+                                                                           jclass clazz,
+                                                                           jlong animated_runtime_address) {
+    // TODO: implement installPointerGetter()
+    auto runtime = reinterpret_cast<jsi::Runtime*>(animated_runtime_address);
+    installPointerGetter(*runtime);
 }

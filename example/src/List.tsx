@@ -5,7 +5,7 @@ import React, {
   createContext,
   useContext,
 } from 'react';
-import { View, Text, StyleSheet, ViewStyle, Button } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle, NativeModules } from 'react-native';
 import {
   RecyclerListView,
   RecyclerRow as RawRecyclerRow,
@@ -19,6 +19,18 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useAnimatedRecycleHandler } from './useAnimatedRecycleEvent';
 import { ReText } from 'react-native-redash';
+import { runOnUI } from 'react-native-reanimated';
+
+const someWorklet = (greeting) => {
+  console.log(greeting, 'From the UI thread');
+};
+
+const onPress = () => {
+  runOnUI(someWorklet)('Howdy');
+};
+
+NativeModules.UltimateNative.setUIThreadPointer(global._WORKLET_RUNTIME.toString());
+
 //import { useDerivedValue } from './useImmediateDerivedValue';
 
 const DataContext = createContext<any[] | null>(null);
@@ -85,7 +97,6 @@ function UltraFastText({ binding }: { binding: string }) {
   );
 }
 
-
 // const List = createList<Data>();
 // const { WrapperList, useUltraFastSomething, useSharedDataAtIndex, useData } = List;
 
@@ -112,7 +123,7 @@ function ContactCell() {
 
   const {
     nested: { prof },
-    name
+    name,
   } = useUltraFastData<DataCell>(); // const prof = "nested.prof"
 
   return (
@@ -141,7 +152,6 @@ function ContactCell() {
       {/*<UltraFastSwtich binding={"type"} >*/}
       {/*  <UltraFastCase type="loading"/>*/}
       {/*</UltraFastSwtich>*/}
-
 
       {/*<UltraFastText binding={name} />*/}
       <ReText text={text} />
@@ -177,26 +187,32 @@ function RecyclerView<TData>({
   data: TData[];
 }) {
   // @ts-ignore
-  const T = {}
+  const T = {};
   const datas = useSharedValue(data);
-  console.log(datas)
+  //console.log(datas);
 
   global.recyclableData = data;
   global.sharedRecyclableData = datas;
 
-  useDerivedValue( () => {
+  useDerivedValue(() => {
     if (global.LayoutAnimationRepository) {
       global.recyclableData = datas.value;
+      console.log(global.getPointer(global.recyclableData))
+
     }
-    console.log(global.x)
-  }, [data])
+    console.log(global.x);
+  }, [data]);
 
-  console.log(T.__reanimatedHostObjectRef)
-  console.log(datas.__reanimatedHostObjectRef, datas.value.__reanimatedHostObjectRef, "GGGG")
+  // console.log(T.__reanimatedHostObjectRef);
+  // console.log(
+  //   datas.__reanimatedHostObjectRef,
+  //   datas.value.__reanimatedHostObjectRef,
+  //   'GGGG'
+  // );
 
-//  console.log(global._WORKLET_RUNTIME)
+  //  console.log(global._WORKLET_RUNTIME)
 
-  setTimeout(() => console.log(global.x), 1000)
+  setTimeout(() => console.log(global.x), 1000);
   return (
     <DataContext.Provider value={data}>
       <View style={style} removeClippedSubviews={false}>
@@ -210,9 +226,6 @@ function RecyclerView<TData>({
     </DataContext.Provider>
   );
 }
-
-
-
 
 export default function Example() {
   // const layoutProvider = useLayoutProvider(() => ({
@@ -230,10 +243,11 @@ export default function Example() {
 
   return (
     <RecyclerView<DataCell>
-    //  layoutProvider={layoutProvider}
+      //  layoutProvider={layoutProvider}
       //layoutTypeExtractor={layoutTypeExtractor} // all called before rendering
-      data={data} style={{ width: '100%', height: 300 }}
-     //layoutProvider={layoutProvider}
+      data={data}
+      style={{ width: '100%', height: 300 }}
+      //layoutProvider={layoutProvider}
     >
       <ContactCell />
     </RecyclerView>
