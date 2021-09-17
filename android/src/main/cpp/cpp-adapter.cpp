@@ -228,10 +228,10 @@ std::string obtainStringValueAtIndexByKeyFromAnimatedThred(jsi::Runtime& animate
     auto global = animatedRuntime.global().getPropertyAsObject(animatedRuntime, "global"); // mmeh
 //
     auto isThreadSetup = global.hasProperty(animatedRuntime, "recyclableData");
-    jsi::Runtime& runtime = isThreadSetup ? animatedRuntime : supportRuntime;
+    jsi::Runtime& runtime = animatedRuntime;
 
     if (!isThreadSetup) {
-        global = supportRuntime.global();
+        return  "XXXX";
     };
 
 

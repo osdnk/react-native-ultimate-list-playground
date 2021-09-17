@@ -68,7 +68,7 @@ export default function App() {
 
 
       <RecyclerView/>
-      <AnimatedStyleUpdateExample/>
+      {/*<AnimatedStyleUpdateExample/>*/}
     </View>
   );
 }
