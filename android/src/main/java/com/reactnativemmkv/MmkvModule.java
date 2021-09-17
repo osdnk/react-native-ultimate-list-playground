@@ -5,10 +5,12 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.JSApplicationCausedNativeException;
 import com.facebook.react.bridge.JavaScriptContextHolder;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.devsupport.JSException;
 import com.facebook.react.module.annotations.ReactModule;
 
 import java.nio.charset.Charset;
@@ -70,6 +72,10 @@ public class MmkvModule extends ReactContextBaseJavaModule {
   }
   public String stringValueAtIndexByKey(int index, String key) {
     Log.d("[A runtime]", String.valueOf(sAnimatedRuntimeAddress));
+    if (sAnimatedRuntimeAddress == -1) {
+      throw new JSApplicationCausedNativeException("sAnimatedRuntimeAddress");
+
+    }
     byte[] bytes = getStringValueAtIndexByKeyFromAnimatedThread(sAnimatedRuntimeAddress, this.context.getJavaScriptContextHolder().get(), index, key);
     return new String(bytes, StandardCharsets.UTF_8);
   }
